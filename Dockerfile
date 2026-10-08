@@ -9,12 +9,20 @@
 # ---------------------------------------------------------------------------
 # Stage 1 – Webapp
 # ---------------------------------------------------------------------------
-FROM node:24.11.1-bookworm-slim AS webapp-builder
+FROM node:24.11.1-bookworm AS webapp-builder
 
 WORKDIR /src/webapp
 
-# Copy dependency manifests first to maximise layer cache
-COPY webapp/package.json webapp/package-lock.json ./
+# Copy all workspace package.json files FIRST so npm install can resolve
+# every workspace even before the full source is copied.
+COPY webapp/package.json                    webapp/package-lock.json   ./
+COPY webapp/channels/package.json           channels/
+COPY webapp/platform/client/package.json    platform/client/
+COPY webapp/platform/components/package.json platform/components/
+COPY webapp/platform/eslint-plugin/package.json platform/eslint-plugin/
+COPY webapp/platform/mattermost-redux/package.json platform/mattermost-redux/
+COPY webapp/platform/shared/package.json    platform/shared/
+COPY webapp/platform/types/package.json     platform/types/
 
 # Install deps (CI=false so devDependencies are included — build needs them)
 RUN CI=false npm install
