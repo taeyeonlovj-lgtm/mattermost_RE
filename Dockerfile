@@ -11,6 +11,10 @@
 # ---------------------------------------------------------------------------
 FROM node:24.11.1-bookworm AS webapp-builder
 
+# The .npmrc in webapp/ sets engine-strict=true, requiring npm 11.6.2 exactly.
+# The official node image ships with npm 10.x, so upgrade first.
+RUN npm install -g npm@11.6.2
+
 WORKDIR /src/webapp
 
 # Copy all workspace package.json files FIRST so npm install can resolve
