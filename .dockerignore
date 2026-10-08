@@ -1,0 +1,15 @@
+.git
+.github
+.cursor
+.e2e-tests
+node_modules
+**/node_modules
+webapp/channels/node_modules
+server/vendor
+*.md
+!README.md
+docs
+e2e-tests
+tools
+.volumes
+volumes

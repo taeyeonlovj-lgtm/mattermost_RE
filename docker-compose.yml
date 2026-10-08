@@ -1,0 +1,50 @@
+# https://docs.docker.com/compose/environment-variables/
+services:
+  postgres:
+    image: postgres:${POSTGRES_IMAGE_TAG:-17-alpine}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    volumes:
+      - ${POSTGRES_DATA_PATH:-./volumes/db/var/lib/postgresql/data}:/var/lib/postgresql
+    environment:
+      - TZ
+      - POSTGRES_USER=${POSTGRES_USER:-mmuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mmuser_password}
+      - POSTGRES_DB=${POSTGRES_DB:-mattermost}
+
+  mattermost:
+    depends_on:
+      postgres:
+        condition: service_started
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mattermost-custom:${MATTERMOST_IMAGE_TAG:-latest}
+    restart: ${RESTART_POLICY:-unless-stopped}
+    security_opt:
+      - no-new-privileges:true
+    read_only: ${MATTERMOST_CONTAINER_READONLY:-false}
+    tmpfs:
+      - /tmp
+    volumes:
+      - ${MATTERMOST_CONFIG_PATH:-./volumes/app/mattermost/config}:/mattermost/config:rw
+      - ${MATTERMOST_DATA_PATH:-./volumes/app/mattermost/data}:/mattermost/data:rw
+      - ${MATTERMOST_LOGS_PATH:-./volumes/app/mattermost/logs}:/mattermost/logs:rw
+      - ${MATTERMOST_PLUGINS_PATH:-./volumes/app/mattermost/plugins}:/mattermost/plugins:rw
+      - ${MATTERMOST_CLIENT_PLUGINS_PATH:-./volumes/app/mattermost/client/plugins}:/mattermost/client/plugins:rw
+      - ${MATTERMOST_BLEVE_INDEXES_PATH:-./volumes/app/mattermost/bleve-indexes}:/mattermost/bleve-indexes:rw
+    ports:
+      - ${APP_PORT:-8065}:8065
+      - ${CALLS_PORT:-8443}:${CALLS_PORT:-8443}/udp
+      - ${CALLS_PORT:-8443}:${CALLS_PORT:-8443}/tcp
+    environment:
+      - TZ
+      - MM_SQLSETTINGS_DRIVERNAME=postgres
+      - MM_SQLSETTINGS_DATASOURCE=postgres://${POSTGRES_USER:-mmuser}:${POSTGRES_PASSWORD:-mmuser_password}@postgres:5432/${POSTGRES_DB:-mattermost}?sslmode=disable&connect_timeout=10
+      - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
+      - MM_SERVICESETTINGS_SITEURL=${MM_SERVICESETTINGS_SITEURL:-http://localhost:8065}
