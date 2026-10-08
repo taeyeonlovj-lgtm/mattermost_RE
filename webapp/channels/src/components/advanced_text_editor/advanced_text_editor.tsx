@@ -373,6 +373,9 @@ const AdvancedTextEditor = ({
             chain.toggleHeading({level: 3}).run();
             break;
         case 'code':
+            chain.toggleCode().run();
+            break;
+        case 'codeBlock':
             chain.toggleCodeBlock().run();
             break;
         case 'quote':

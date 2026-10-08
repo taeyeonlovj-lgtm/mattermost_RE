@@ -148,6 +148,7 @@ const useKeyHandler = (
 
         const ctrlKeyCombo = Keyboard.cmdOrCtrlPressed(e) && !e.altKey && !e.shiftKey;
         const ctrlAltCombo = Keyboard.cmdOrCtrlPressed(e, true) && e.altKey;
+        const ctrlAltShiftCombo = Keyboard.cmdOrCtrlPressed(e, true) && e.altKey && e.shiftKey;
         const shiftAltCombo = !Keyboard.cmdOrCtrlPressed(e) && e.shiftKey && e.altKey;
         const ctrlShiftCombo = Keyboard.cmdOrCtrlPressed(e, true) && e.shiftKey;
 
@@ -230,6 +231,12 @@ const useKeyHandler = (
                 e.stopPropagation();
                 e.preventDefault();
                 applyFormatting('link');
+            }
+        } else if (ctrlAltShiftCombo && !caretIsWithinCodeBlock) {
+            if (Keyboard.isKeyPressed(e, KeyCodes.C)) {
+                e.stopPropagation();
+                e.preventDefault();
+                applyFormatting('codeBlock');
             }
         } else if (ctrlAltCombo && !caretIsWithinCodeBlock) {
             if (Keyboard.isKeyPressed(e, KeyCodes.K)) {

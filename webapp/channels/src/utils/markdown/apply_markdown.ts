@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-export type MarkdownMode = 'bold' | 'italic' | 'link' | 'strike' | 'code' | 'heading' | 'quote' | 'ul' | 'ol';
+export type MarkdownMode = 'bold' | 'italic' | 'link' | 'strike' | 'code' | 'codeBlock' | 'heading' | 'quote' | 'ul' | 'ol';
 
 export type ApplyMarkdownOptions = {
     markdownMode: MarkdownMode;
@@ -76,6 +76,8 @@ export function applyMarkdown(options: ApplyMarkdownOptions): ApplyMarkdownRetur
         return applyMarkdownToSelection({selectionEnd, selectionStart, message, delimiter});
     case 'code':
         return applyCodeMarkdown({selectionEnd, selectionStart, message});
+    case 'codeBlock':
+        return applyCodeBlockMarkdown({selectionEnd, selectionStart, message});
     }
 
     throw Error('Unsupported markdown mode: ' + markdownMode);
@@ -502,6 +504,49 @@ function applyCodeMarkdown({selectionEnd, selectionStart, message}: ApplySpecifi
         return applyMarkdownToSelection({selectionEnd, selectionStart, message, delimiterStart: '```\n', delimiterEnd: '\n```'});
     }
     return applyMarkdownToSelection({selectionEnd, selectionStart, message, delimiter: '`'});
+}
+
+function applyCodeBlockMarkdown({selectionEnd, selectionStart, message}: ApplySpecificMarkdownOptions) {
+    const openingDelimiter = '```\n';
+    const closingDelimiter = '\n```';
+
+    // Check whether the cursor / selection is already inside a fenced code block.
+    // Search outward from the selection boundaries for the nearest ``` fences.
+    let openFenceStart = -1;
+    for (let i = selectionStart; i >= 0; i--) {
+        if (message.startsWith('```', i)) {
+            openFenceStart = i;
+            break;
+        }
+    }
+
+    if (openFenceStart !== -1) {
+        // Look for the matching closing fence after the selection end.
+        const searchFrom = Math.max(selectionEnd, openFenceStart + 3);
+        const closeFenceStart = message.indexOf('```', searchFrom);
+        if (closeFenceStart !== -1) {
+            // Cursor is inside a fenced block — remove the fences and keep the code.
+            const contentStart = openFenceStart + openingDelimiter.length;
+            const contentEnd = closeFenceStart;
+            const newMessage = message.substring(0, openFenceStart) + message.substring(contentStart, contentEnd) + message.substring(closeFenceStart + closingDelimiter.length);
+            return {
+                message: newMessage,
+                selectionStart: openFenceStart,
+                selectionEnd: openFenceStart + (contentEnd - contentStart),
+            };
+        }
+    }
+
+    // Not inside a fenced block — wrap the selection with fences.
+    const prefix = message.slice(0, selectionStart);
+    const selection = message.slice(selectionStart, selectionEnd);
+    const suffix = message.slice(selectionEnd);
+    const newMessage = prefix + openingDelimiter + selection + closingDelimiter + suffix;
+    return {
+        message: newMessage,
+        selectionStart: selectionStart + openingDelimiter.length,
+        selectionEnd: selectionStart + openingDelimiter.length + selection.length,
+    };
 }
 
 function findWordEnd(text: string, start: number) {
