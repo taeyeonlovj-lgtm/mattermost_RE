@@ -131,6 +131,10 @@
     "defaultMessage": "code",
     "description": "Accessibility label for the code formatting button in the message toolbar; 'code' as in source code; lowercase by design."
   },
+  "accessibility.button.code_block": {
+    "defaultMessage": "code block",
+    "description": "Accessibility label for the code block formatting button in the message toolbar; 'code block' as in fenced code block; lowercase by design."
+  },
   "accessibility.button.formatting": {
     "defaultMessage": "formatting",
     "description": "Accessibility label for the toolbar button that shows or hides the message formatting toolbar; lowercase by design."
@@ -29402,6 +29406,14 @@
   "shortcuts.msgs.markdown.code.mac": {
     "defaultMessage": "Code:\t⌘|⌥|C",
     "description": "Keyboard shortcuts modal entry (macOS) for code formatting; keep the tab and '|' separators between key names."
+  },
+  "shortcuts.msgs.markdown.code_block": {
+    "defaultMessage": "Code block:\tCtrl|Alt|Shift|C",
+    "description": "Formatting shortcut entry for code block formatting; description before the tab, keys after it separated by '|'. Keep the tab and pipes; do not translate key names."
+  },
+  "shortcuts.msgs.markdown.code_block.mac": {
+    "defaultMessage": "Code block:\t⌘|⌥|⇧|C",
+    "description": "Keyboard shortcuts modal entry (macOS) for code block formatting; keep the tab and '|' separators between key names."
   },
   "shortcuts.msgs.markdown.emoji": {
     "defaultMessage": "Emoji / Gif picker:\tCtrl|Alt|E",

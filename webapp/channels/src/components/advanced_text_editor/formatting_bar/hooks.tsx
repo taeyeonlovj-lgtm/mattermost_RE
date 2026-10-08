@@ -82,7 +82,11 @@ const CONTROLS_COUNT_BASE: Record<LayoutMode, number> = {
 };
 
 // All available formatting controls in priority order
-const ALL_CONTROLS: MarkdownMode[] = ['bold', 'italic', 'strike', 'heading', 'link', 'code', 'quote', 'ul', 'ol'];
+const ALL_CONTROLS: MarkdownMode[] = ['bold', 'italic', 'strike', 'heading', 'link', 'code', 'codeBlock', 'quote', 'ul', 'ol'];
+
+// Controls that must always be visible regardless of layout mode / bar width.
+// codeBlock (the {;} code-fence button) is pinned so users can reach it on every breakpoint.
+const PINNED_CONTROLS: Set<MarkdownMode> = new Set(['codeBlock']);
 
 // Wide layout always shows all icons — there is enough room regardless of additional controls.
 // Center channel: reduction starts from the 2nd additional control (1 extra always fits).
@@ -116,11 +120,21 @@ export function splitFormattingBarControls(
 
     const sourceControls = showTextStyleDropdown ? ALL_CONTROLS.filter((c) => c !== 'heading') : ALL_CONTROLS;
 
-    const controls = sourceControls.slice(0, visibleControlsCount);
-    const hiddenControls = sourceControls.slice(visibleControlsCount);
+    // Pinned controls are always visible; their slots don't count toward the
+    // responsive budget so they never get pushed into the "…" overflow menu.
+    const unpinnedControls = sourceControls.filter((c) => !PINNED_CONTROLS.has(c));
+    const controls = unpinnedControls.slice(0, visibleControlsCount);
+
+    // Merge pinned controls after the regular visible ones, preserving their
+    // original relative order within ALL_CONTROLS.
+    const pinnedFromSource = sourceControls.filter((c) => PINNED_CONTROLS.has(c));
+    const allVisible = [...controls, ...pinnedFromSource];
+
+    // Anything that is neither in the visible set nor pinned ends up hidden.
+    const hiddenControls = unpinnedControls.slice(visibleControlsCount);
 
     return {
-        controls,
+        controls: allVisible,
         hiddenControls,
         showTextStyleDropdown,
     };

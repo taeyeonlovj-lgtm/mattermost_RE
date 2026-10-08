@@ -146,7 +146,8 @@ const WYSIWYG_NODE_FOR_MODE: Partial<Record<MarkdownMode, string>> = {
     bold: 'bold',
     italic: 'italic',
     strike: 'strike',
-    code: 'codeBlock',
+    code: 'code',
+    codeBlock: 'codeBlock',
     quote: 'blockquote',
     heading: 'heading',
     ul: 'bulletList',
@@ -168,7 +169,7 @@ function computeActiveModes(editor: Editor | null, modes: MarkdownMode[]): Parti
     return result;
 }
 
-const ALL_FORMATTING_MODES: MarkdownMode[] = ['bold', 'italic', 'strike', 'heading', 'link', 'code', 'quote', 'ul', 'ol'];
+const ALL_FORMATTING_MODES: MarkdownMode[] = ['bold', 'italic', 'strike', 'heading', 'link', 'code', 'codeBlock', 'quote', 'ul', 'ol'];
 
 const FormattingBar = forwardRef<FormattingBarHandle, FormattingBarProps>((props, ref) => {
     const {

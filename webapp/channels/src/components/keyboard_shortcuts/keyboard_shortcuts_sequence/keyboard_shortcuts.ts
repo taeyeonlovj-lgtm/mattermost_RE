@@ -327,6 +327,16 @@ export const KEYBOARD_SHORTCUTS = {
             defaultMessage: 'Code:\t⌘|⌥|C',
         },
     }),
+    msgMarkdownCodeBlock: defineMessages({
+        default: {
+            id: 'shortcuts.msgs.markdown.code_block',
+            defaultMessage: 'Code block:\tCtrl|Alt|Shift|C',
+        },
+        mac: {
+            id: 'shortcuts.msgs.markdown.code_block.mac',
+            defaultMessage: 'Code block:\t⌘|⌥|⇧|C',
+        },
+    }),
     msgMarkdownStrike: defineMessages({
         default: {
             id: 'shortcuts.msgs.markdown.strike',
