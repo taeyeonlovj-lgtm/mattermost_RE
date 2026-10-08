@@ -28,6 +28,13 @@ COPY webapp/platform/mattermost-redux/package.json platform/mattermost-redux/
 COPY webapp/platform/shared/package.json    platform/shared/
 COPY webapp/platform/types/package.json     platform/types/
 
+# The package-lock.json references two Mattermost GitHub forks via SSH
+# (marked, react-bootstrap). Convert to HTTPS so the build works without
+# an SSH key.
+ENV GIT_CONFIG_COUNT=1
+ENV GIT_CONFIG_KEY_0="url.https://github.com/.insteadOf"
+ENV GIT_CONFIG_VALUE_0="ssh://git@github.com/"
+
 # Install deps (CI=false so devDependencies are included — build needs them)
 RUN CI=false npm install
 
@@ -62,12 +69,14 @@ COPY server/ ./server/
 # and uncomment the line below:
 # COPY enterprise/ ./enterprise/
 
+# Create go.work (required by the server build — mirrors `make setup-go-work`)
+RUN cd server \
+    && go work init \
+    && go work use . \
+    && go work use ./public
+
 # Copy the pre-built webapp dist from stage 1
 COPY --from=webapp-builder /src/webapp/channels/dist ./webapp/channels/dist
-
-# Symlink the client dist so the server can embed it
-RUN mkdir -p server/client \
-    && ln -nfs /src/mattermost/webapp/channels/dist server/client/dist
 
 # Build the server binary
 RUN cd server \
